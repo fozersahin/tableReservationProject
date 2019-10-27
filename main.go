@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", rest.SayHello)
+	http.HandleFunc("/", rest.ReserveTable)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
