@@ -18,6 +18,12 @@ func ReserveTable(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		decoder.Decode(&newReservation)
 
+		if newReservation.Table <= 0 || newReservation.Table > 30 {
+			w.WriteHeader(400)
+			w.Write([]byte("Invalid table number!"))
+			return
+		}
+
 		if value, ok := reservations[newReservation.Table]; ok {
 			fmt.Println("ERROR- Table reserved: ", value.Table)
 			w.WriteHeader(400)
