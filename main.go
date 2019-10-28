@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strconv"
-	"strings"
-	"tableReservationProject/rest"
 )
 
 func main() {
@@ -24,27 +21,32 @@ func socket() {
 		if err != nil {
 			// handle error
 		}
-		fmt.Println(conn)
-
 		go handleRequest(conn)
 	}
 }
 
 func handleRequest(conn net.Conn) {
+
 	message, err := bufio.NewReader(conn).ReadString('\n')
 
 	fmt.Println(message)
-	message = strings.Trim(message, " ")
-	tableNum, err := strconv.Atoi(message)
+	//fmt.Println(conn)
+	//message = strings.Trim(message, " ")
+	//tableNum, err := strconv.Atoi(message)
 
 	// Send table num, to func
-	response := rest.ReserveTable(tableNum)
+	//esponse := rest.ReserveTable(tableNum)
 
 	if err != nil && err != io.EOF {
 		fmt.Println("Error reading:", err.Error())
 	}
 	// Send a response back to person contacting us.
-	conn.Write([]byte(response))
+	//conn.Write([]byte(response))
 	// Close the connection when you're done with it.
+
+	conn.Write([]byte("HTTP/1.1 200 OK\r\n"))
+	conn.Write([]byte("\r\n"))
+	conn.Write([]byte("Request received!"))
+
 	conn.Close()
 }
