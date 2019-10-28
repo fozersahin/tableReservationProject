@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net"
+	"strconv"
+	"strings"
+	"tableReservationProject/rest"
 )
 
 func main() {
-	//http.HandleFunc("/", rest.ReserveTable)
-	//if err := http.ListenAndServe(":8080", nil); err != nil {
-	//	panic(err)
-	//}
-
 	socket()
 }
 
@@ -31,17 +31,20 @@ func socket() {
 }
 
 func handleRequest(conn net.Conn) {
-	// Make a buffer to hold incoming data.
-	buf := make([]byte, 1024)
-	// Read the incoming connection into the buffer.
-	message, err := conn.Read(buf)
+	message, err := bufio.NewReader(conn).ReadString('\n')
 
 	fmt.Println(message)
-	if err != nil {
+	message = strings.Trim(message, " ")
+	tableNum, err := strconv.Atoi(message)
+
+	// Send table num, to func
+	response := rest.ReserveTable(tableNum)
+
+	if err != nil && err != io.EOF {
 		fmt.Println("Error reading:", err.Error())
 	}
 	// Send a response back to person contacting us.
-	conn.Write([]byte("Message received.\n"))
+	conn.Write([]byte(response))
 	// Close the connection when you're done with it.
 	conn.Close()
 }

@@ -1,9 +1,7 @@
 package rest
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
 type reservation struct {
@@ -12,30 +10,22 @@ type reservation struct {
 
 var reservations = make(map[int]reservation)
 
-func ReserveTable(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		var newReservation reservation
-		decoder := json.NewDecoder(r.Body)
-		decoder.Decode(&newReservation)
+func ReserveTable(tableNumber int) string {
+	var newReservation reservation
 
-		if newReservation.Table <= 0 || newReservation.Table > 30 {
-			w.WriteHeader(400)
-			w.Write([]byte("Invalid table number!"))
-			return
-		}
+	// for string requests , table number will be zero.
+	newReservation.Table = tableNumber
+	if newReservation.Table <= 0 || newReservation.Table > 30 {
+		return "Invalid table number!\n"
+	}
 
-		if value, ok := reservations[newReservation.Table]; ok {
-			fmt.Println("ERROR- Table reserved: ", value.Table)
-			w.WriteHeader(400)
-			w.Write([]byte("Table has already been reserved!"))
-		} else {
-			fmt.Println("Table reserving.. Table no:", newReservation.Table)
-			reservations[newReservation.Table] = newReservation
-			w.WriteHeader(201)
-			w.Write([]byte("Table is reserved for you"))
-		}
-
+	// availability check
+	if value, ok := reservations[newReservation.Table]; ok {
+		fmt.Println("ERROR- Table is already reserved: ", value.Table)
+		return "Table has already been reserved!\n"
 	} else {
-		http.Error(w, "Method not found.", http.StatusMethodNotAllowed)
+		fmt.Println("Table reserving.. Table no:", newReservation.Table)
+		reservations[newReservation.Table] = newReservation
+		return "Table is reserved for you\n"
 	}
 }
