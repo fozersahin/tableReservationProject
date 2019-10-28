@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net"
+	"strings"
+	"tableReservationProject/rest"
 )
 
 func main() {
@@ -25,28 +26,31 @@ func socket() {
 	}
 }
 
+//TODO connection final check&timeout should be implemented
+//TODO routing functionality should be implemented (ie:awareness of TCP to HTTP :  method:POST  route:/  protocol: HTTP/1.1 )
+
 func handleRequest(conn net.Conn) {
+	// Buffer that holds incoming information
+	buf := make([]byte, 1024)
+	length, err := conn.Read(buf)
+	fmt.Println("Read len:", length)
+	if length > 0 {
 
-	message, err := bufio.NewReader(conn).ReadString('\n')
+		request := string(buf[:length])
+		var method = strings.TrimSpace(request[0:strings.Index(request, "/")])
 
-	fmt.Println(message)
-	//fmt.Println(conn)
-	//message = strings.Trim(message, " ")
-	//tableNum, err := strconv.Atoi(message)
+		var body = request[strings.Index(request, "{"):len(request)]
+		fmt.Print(body)
+		if io.EOF == err {
+			fmt.Println("EOF:")
+		}
 
-	// Send table num, to func
-	//esponse := rest.ReserveTable(tableNum)
+		rest.ReserveTable(body, method, conn)
 
-	if err != nil && err != io.EOF {
-		fmt.Println("Error reading:", err.Error())
+	} else {
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n"))
+		conn.Write([]byte("\r\n"))
+		conn.Write([]byte("Request received!"))
+		conn.Close()
 	}
-	// Send a response back to person contacting us.
-	//conn.Write([]byte(response))
-	// Close the connection when you're done with it.
-
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n"))
-	conn.Write([]byte("\r\n"))
-	conn.Write([]byte("Request received!"))
-
-	conn.Close()
 }
