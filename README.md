@@ -12,6 +12,8 @@ Only variable is table.
 
 Example body : 
 
+```
 {
   "table" : 10
 }
+```
